@@ -2,6 +2,7 @@ package main
 
 import (
   "testing"
+  "github.com/garyburd/redigo/redis"
 )
 
 func Test_ParsePath_Error(t *testing.T) {
@@ -47,5 +48,9 @@ func TestDrainStore_Works(t *testing.T) {
   log := "241 <158>1 2014-02-25T08:42:07.784181+00:00 host heroku router - at=info method=GET path=/foo host=pedro-dev.herokuapp.com request_id=ccdec783-b755-4b25-802e-00b1f99ee357 fwd=\"199.21.84.17\" dyno=web.1 connect=2ms service=22ms status=200 bytes=5077"
   if (!DrainStore(r, "1", "abc", log)) {
     t.Error("Expected it to return true")
+  }
+  request, _ := redis.String(r.Do("LPOP", "requests"))
+  if (request != "GET/foo200") {
+    t.Error("Expected to store request in redis list")
   }
 }

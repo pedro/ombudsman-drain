@@ -33,13 +33,15 @@ func DrainStore(r redis.Conn, id string, secret string, body string) bool {
 	}
 
 	matchMethod, _ := regexp.Compile(`method=(\w+)`)
-	method := matchMethod.FindStringSubmatch(body)
+	method := matchMethod.FindStringSubmatch(body)[1]
 
 	matchPath, _ := regexp.Compile(`path=([^ ]+)`)
-	path := matchPath.FindStringSubmatch(body)
+	path := matchPath.FindStringSubmatch(body)[1]
 
 	matchStatus, _ := regexp.Compile(`status=(\d+)`)
-	status := matchStatus.FindStringSubmatch(body)
+	status := matchStatus.FindStringSubmatch(body)[1]
+
+	r.Do("RPUSH", "requests", method + path + status)
 	return true
 }
 
