@@ -1,5 +1,5 @@
 {
-	"ImportPath": "ombudsman-drain",
+	"ImportPath": "drain",
 	"GoVersion": "go1.1.2",
 	"Deps": [
 		{
