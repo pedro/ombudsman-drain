@@ -11,13 +11,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-type Request struct {
-	App_id string
-	Verb   string
-	Path   string
-	Status string
-}
-
 func DrainHandler(redis redis.Conn, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	bodyInBytes, _ := ioutil.ReadAll(r.Body)
