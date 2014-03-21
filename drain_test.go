@@ -2,6 +2,7 @@ package main
 
 import (
   "testing"
+  "encoding/json"
   "github.com/garyburd/redigo/redis"
 )
 
@@ -49,8 +50,19 @@ func TestDrainStore_Works(t *testing.T) {
   if (!DrainStore(r, "1", "abc", log)) {
     t.Error("Expected it to return true")
   }
-  request, _ := redis.String(r.Do("LPOP", "requests"))
-  if (request != "GET/foo200") {
-    t.Error("Expected to store request in redis list")
+  raw, _ := redis.Bytes(r.Do("LPOP", "requests"))
+  request := make(map[string]string)
+  err := json.Unmarshal(raw, &request)
+  if (err != nil) {
+    t.Error("could not deserialize json")
+  }
+  if (request["verb"] != "GET") {
+    t.Error("Expected request verb GET, got", request["verb"])
+  }
+  if (request["path"] != "/foo") {
+    t.Error("Expected to store request path /foo, got", request["path"])
+  }
+  if (request["status"] != "200") {
+    t.Error("Expected to store request status 200, got", request["status"])
   }
 }

@@ -4,11 +4,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"encoding/json"
 	"strings"
 	"net/http"
 	"regexp"
 	"github.com/garyburd/redigo/redis"
 )
+
+type Request struct {
+	App_id string
+	Verb   string
+	Path   string
+	Status string
+}
 
 func DrainHandler(redis redis.Conn, w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -32,16 +40,24 @@ func DrainStore(r redis.Conn, id string, secret string, body string) bool {
 		return false
 	}
 
-	matchMethod, _ := regexp.Compile(`method=(\w+)`)
-	method := matchMethod.FindStringSubmatch(body)[1]
+	request := make(map[string]string)
+	request["app_id"] = id
+
+	matchVerb, _ := regexp.Compile(`method=(\w+)`)
+	request["verb"] = matchVerb.FindStringSubmatch(body)[1]
 
 	matchPath, _ := regexp.Compile(`path=([^ ]+)`)
-	path := matchPath.FindStringSubmatch(body)[1]
+	request["path"] = matchPath.FindStringSubmatch(body)[1]
 
 	matchStatus, _ := regexp.Compile(`status=(\d+)`)
-	status := matchStatus.FindStringSubmatch(body)[1]
+	request["status"] = matchStatus.FindStringSubmatch(body)[1]
 
-	r.Do("RPUSH", "requests", method + path + status)
+	raw, err := json.Marshal(request)
+	if err != nil {
+		panic(err)
+	}
+
+	r.Do("RPUSH", "requests", raw)
 	return true
 }
 
