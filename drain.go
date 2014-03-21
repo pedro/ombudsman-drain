@@ -90,8 +90,8 @@ func main() {
 	}
 	fmt.Println("listening on " + port)
 
-    err := http.ListenAndServe(":" + port, nil)
-    if err != nil {
-      panic(err)
-    }
+	err := http.ListenAndServe(":" + port, nil)
+	if err != nil {
+		panic(err)
+	}
 }
