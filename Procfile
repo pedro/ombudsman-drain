@@ -1,1 +1,1 @@
-web: ./drain
+web: ./ombudsman-drain
